@@ -82,3 +82,5 @@ RAG 检索基准不调用模型，可直接运行：
 当前基准包含 14 个查询，输出 Hit@1、Hit@3、MRR、无关问题拒绝率和知识库内容指纹。GitHub Actions 会在 MySQL 8.4 服务上运行后端测试、检索评测和前端生产构建。
 
 完整的 Agent 工程成熟度、风险和两周改造顺序见 `AGENT_ENGINEERING_REVIEW.md`。
+
+面试准备、Agent 工作原理、25 个常见问题及量化指标见 `AGENT_INTERVIEW_GUIDE.md`。
