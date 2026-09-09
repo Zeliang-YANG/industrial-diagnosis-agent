@@ -1,0 +1,114 @@
+{
+  "status": "ok",
+  "trace": [
+    {
+      "tool_call_id": "call_00_4MvIugXJKBwrqifeqzbs8841",
+      "name": "query_kpi",
+      "arguments": {
+        "equip_id": "BJ-CNC-001",
+        "date": "2026-09-07"
+      },
+      "result": {
+        "status": "ok",
+        "equip_id": "BJ-CNC-001",
+        "date": "2026-09-07",
+        "as_of": "2026-09-07T19:17:58.286363",
+        "source": {
+          "database": "yzl_agent_demo",
+          "timezone": "Asia/Shanghai",
+          "mode": "read_only",
+          "data_kind": "simulation"
+        },
+        "current": {
+          "equip_id": "BJ-CNC-001",
+          "stats": {
+            "t_val": 81.0,
+            "t_loss": 4767.286363,
+            "t_down": 6.0,
+            "t_plan_down": 0,
+            "t_non_sch": 9.0
+          },
+          "fault_count": 1,
+          "total_qty": 13,
+          "bad_qty": 2,
+          "metrics": {
+            "ideal_cycle_sec": 7.0,
+            "t_total": 4863.286363,
+            "t_load": 4854.286363,
+            "t_op": 4848.286363,
+            "availability": 99.8763978976244,
+            "performance": 1.8769518379622165,
+            "quality": 84.61538461538461,
+            "oee": 1.5862269804868534,
+            "mtbf": 80.80477271666668,
+            "mttr": 0.1,
+            "t_val": 81.0,
+            "t_loss": 4767.286363,
+            "t_down": 6.0,
+            "t_plan": 0,
+            "t_off": 9.0
+          },
+          "as_of": "2026-09-07T19:17:58.286363",
+          "warnings": [
+            "open_events_capped_at_query_time",
+            "overlapping_state_events"
+          ],
+          "data_quality": "invalid",
+          "oee_applicable": true,
+          "evidence": {
+            "event_count": 38,
+            "event_ids_preview": [
+              1,
+              13,
+              19,
+              25,
+              30,
+              35,
+              39,
+              51,
+              58,
+              62,
+              67,
+              70,
+              82,
+              88,
+              93,
+              98,
+              102,
+              111,
+              114,
+              118
+            ],
+            "event_ids_truncated": true,
+            "telemetry_count": 154,
+            "first_telemetry_id": 1,
+            "last_telemetry_id": 460,
+            "observed_start": "2026-09-07T17:52:44",
+            "observed_end": "2026-09-07T18:13:45"
+          }
+        },
+        "definition": {
+          "version": "equipment_daily_v2",
+          "availability": "(t_val+t_loss)/(t_val+t_loss+t_down+t_plan_down)*100",
+          "performance": "observed_count*ideal_cycle_sec/(t_val+t_loss)*100",
+          "quality": "(observed_count-bad_count)/observed_count*100",
+          "oee": "availability*performance*quality/10000",
+          "ideal_cycle_sec": 7.0,
+          "parameter_basis": "当前配置重算；历史节拍参数尚未版本化保存",
+          "percent_unit": "0–100; differences are percentage points",
+          "reliability_unit": "minutes",
+          "quantity_basis": "sum_nonnegative_deltas_between_in_day_samples",
+          "warning": "零产量时 Q=100、无故障时 MTBF/MTTR=0 是兼容占位值；须结合 warnings，不能据此作诊断。"
+        }
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 3555,
+    "completion_tokens": 302,
+    "total_tokens": 3857
+  },
+  "model_requests": 2,
+  "answer": "BJ-CNC-001 在 2026-09-07 的 KPI 数据质量结论如下：\n\n**数据质量：invalid（无效）**\n\n依据：\n- `data_quality = \"invalid\"`\n- warnings 明确包含 **`overlapping_state_events`（状态事件重叠）** 和 `open_events_capped_at_query_time`（开放事件在查询时刻被截断）。\n\n**结论：**\n由于存在状态事件重叠，该日计算出的 KPI（OEE≈1.59%、可用率≈99.88%、性能≈1.88%、质量≈84.62% 等）**不能用于判断真实设备效率**。重叠事件会使持续时间被错误解释，相关数值不可作为可靠结论。\n\n数据限制：当前为部分观测（observed 至 18:13:45），且事件列表被截断（event_ids_truncated=true）。\n\n如需进一步核实，需先解决事件重叠的数据质量问题，但按您要求不再查询其他工具。",
+  "model": "deepseek-v4-flash"
+}

@@ -1,0 +1,16 @@
+[
+  {"id":"oee_order","query":"OEE下降先看哪个指标","expected_ids":["KB-OEE-001#2"]},
+  {"id":"cnc_cycle","query":"主轴速度不足和节拍变慢","expected_ids":["KB-CNC-001#2"]},
+  {"id":"robot_wait","query":"机器人长时间等待怎么查","expected_ids":["KB-ROBOT-001#1"]},
+  {"id":"opcua_stale","query":"OPC UA连接成功但数据不更新","expected_ids":["KB-PLC-001#2"]},
+  {"id":"counter_reset","query":"计数器突然归零","expected_ids":["KB-DATA-001#4"]},
+  {"id":"event_overlap","query":"状态事件发生重叠","expected_ids":["KB-DATA-001#2"]},
+  {"id":"answer_citation","query":"诊断回答如何引用证据","expected_ids":["KB-AGENT-001#1"]},
+  {"id":"multi_device_offline","query":"多台设备同时离线","expected_ids":["KB-PLC-001#4"]},
+  {"id":"quality_batch","query":"质量指数下降与次品批次","expected_ids":["KB-CNC-001#3","KB-OEE-001#2"]},
+  {"id":"no_data_boundary","query":"没有数据能否判断设备正常","expected_ids":["KB-OEE-001#1","KB-AGENT-001#4"]},
+  {"id":"gripper_failure","query":"夹爪抓取失败","expected_ids":["KB-ROBOT-001#2"]},
+  {"id":"opcua_recovery","query":"OPC UA通信恢复后怎么验证","expected_ids":["KB-PLC-001#5"]},
+  {"id":"telemetry_gap","query":"采集空档怎么计算覆盖率","expected_ids":["KB-DATA-001#1"]},
+  {"id":"unrelated_query","query":"火星天气量子香蕉","expected_ids":[],"expect_no_match":true}
+]

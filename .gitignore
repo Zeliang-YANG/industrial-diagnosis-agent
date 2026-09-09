@@ -1,0 +1,11 @@
+.venv/
+node_modules/
+dist/
+.coverage
+coverage.xml
+__pycache__/
+*.pyc
+.DS_Store
+.env
+毕设后端/data/
+毕设后端/logs/

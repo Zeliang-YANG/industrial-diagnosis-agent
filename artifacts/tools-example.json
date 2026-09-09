@@ -1,0 +1,189 @@
+{
+  "query_kpi": {
+    "as_of": "2026-09-07T18:13:34.863825",
+    "current": {
+      "as_of": "2026-09-07T18:13:34.863825",
+      "bad_qty": 2,
+      "equip_id": "BJ-CNC-001",
+      "evidence": {
+        "event_count": 35,
+        "event_ids_preview": [
+          1,
+          13,
+          19,
+          25,
+          30,
+          35,
+          39,
+          51,
+          58,
+          62,
+          67,
+          70,
+          82,
+          88,
+          93,
+          98,
+          102,
+          111,
+          114,
+          118
+        ],
+        "event_ids_truncated": true,
+        "first_telemetry_id": 1,
+        "last_telemetry_id": 427,
+        "observed_end": "2026-09-07T18:13:34",
+        "observed_start": "2026-09-07T17:52:44",
+        "telemetry_count": 143
+      },
+      "fault_count": 1,
+      "metrics": {
+        "availability": 99.38758490688714,
+        "ideal_cycle_sec": 7.0,
+        "mtbf": 16.228794166666667,
+        "mttr": 0.1,
+        "oee": 7.144842752983446,
+        "performance": 8.626642162210347,
+        "quality": 83.33333333333334,
+        "t_down": 6.0,
+        "t_load": 979.72765,
+        "t_loss": 900.72765,
+        "t_off": 9.0,
+        "t_op": 973.72765,
+        "t_plan": 0,
+        "t_total": 988.72765,
+        "t_val": 73.0
+      },
+      "oee_applicable": true,
+      "stats": {
+        "t_down": 6.0,
+        "t_loss": 900.72765,
+        "t_non_sch": 9.0,
+        "t_plan_down": 0,
+        "t_val": 73.0
+      },
+      "total_qty": 12,
+      "warnings": [
+        "open_events_capped_at_query_time"
+      ]
+    },
+    "date": "2026-09-07",
+    "definition": {
+      "availability": "(t_val+t_loss)/(t_val+t_loss+t_down+t_plan_down)*100",
+      "ideal_cycle_sec": 7.0,
+      "oee": "availability*performance*quality/10000",
+      "parameter_basis": "当前配置重算；历史节拍参数尚未版本化保存",
+      "percent_unit": "0–100; differences are percentage points",
+      "performance": "observed_count*ideal_cycle_sec/(t_val+t_loss)*100",
+      "quality": "(observed_count-bad_count)/observed_count*100",
+      "quantity_basis": "sum_nonnegative_deltas_between_in_day_samples",
+      "reliability_unit": "minutes",
+      "version": "equipment_daily_v2",
+      "warning": "零产量时 Q=100、无故障时 MTBF/MTTR=0 是兼容占位值；须结合 warnings，不能据此作诊断。"
+    },
+    "equip_id": "BJ-CNC-001",
+    "source": {
+      "data_kind": "simulation",
+      "database": "yzl_agent_demo",
+      "mode": "read_only",
+      "timezone": "Asia/Shanghai"
+    },
+    "status": "ok"
+  },
+  "query_device_state": {
+    "as_of": "2026-09-07T18:13:34.880904",
+    "date": "2026-09-07",
+    "equip_id": "BJ-CNC-001",
+    "events": [
+      {
+        "alarm_code": 0,
+        "duration_in_window_sec": 3.0,
+        "end_time": "2026-09-07T17:52:47",
+        "equip_id": "BJ-CNC-001",
+        "evidence_ref": "status_event_log:1",
+        "id": 1,
+        "is_open": false,
+        "start_time": "2026-09-07T17:52:44",
+        "state_code": "ssby",
+        "window_end": "2026-09-07T17:52:47",
+        "window_start": "2026-09-07T17:52:44"
+      },
+      {
+        "alarm_code": 0,
+        "duration_in_window_sec": 5.0,
+        "end_time": "2026-09-07T17:52:52",
+        "equip_id": "BJ-CNC-001",
+        "evidence_ref": "status_event_log:13",
+        "id": 13,
+        "is_open": false,
+        "start_time": "2026-09-07T17:52:47",
+        "state_code": "srun",
+        "window_end": "2026-09-07T17:52:52",
+        "window_start": "2026-09-07T17:52:47"
+      },
+      {
+        "alarm_code": 0,
+        "duration_in_window_sec": 3.0,
+        "end_time": "2026-09-07T17:52:55",
+        "equip_id": "BJ-CNC-001",
+        "evidence_ref": "status_event_log:19",
+        "id": 19,
+        "is_open": false,
+        "start_time": "2026-09-07T17:52:52",
+        "state_code": "ssby",
+        "window_end": "2026-09-07T17:52:55",
+        "window_start": "2026-09-07T17:52:52"
+      }
+    ],
+    "next_after_id": 19,
+    "note": "无匹配记录不代表设备正常；事件按 ID 分页，时长仅为所选日期内的交集。",
+    "source": {
+      "data_kind": "simulation",
+      "database": "yzl_agent_demo",
+      "mode": "read_only",
+      "timezone": "Asia/Shanghai"
+    },
+    "status": "ok",
+    "truncated": true
+  },
+  "query_fault_events": {
+    "as_of": "2026-09-07T18:13:34.885770",
+    "date": "2026-09-07",
+    "equip_id": "BJ-CNC-001",
+    "events": [
+      {
+        "alarm_code": 201,
+        "catalog": {
+          "alarm_code": 201,
+          "alarm_desc": "冷却回路压力/流量不足。",
+          "alarm_label": "冷却系统异常",
+          "device_type": "cnc",
+          "severity": "medium",
+          "suggested_action": "检查冷却泵、过滤器与冷却液液位。"
+        },
+        "catalog_source": "fault_catalog.py — 原项目模拟规则，非厂商手册",
+        "duration_in_window_sec": 6.0,
+        "end_time": "2026-09-07T17:58:20",
+        "equip_id": "BJ-CNC-001",
+        "evidence_ref": "status_event_log:111",
+        "id": 111,
+        "is_open": false,
+        "root_cause_confirmed": false,
+        "start_time": "2026-09-07T17:58:14",
+        "state_code": "su_down",
+        "window_end": "2026-09-07T17:58:20",
+        "window_start": "2026-09-07T17:58:14"
+      }
+    ],
+    "next_after_id": null,
+    "note": "无匹配记录不代表设备正常；事件按 ID 分页，时长仅为所选日期内的交集。",
+    "source": {
+      "data_kind": "simulation",
+      "database": "yzl_agent_demo",
+      "mode": "read_only",
+      "timezone": "Asia/Shanghai"
+    },
+    "status": "ok",
+    "truncated": false
+  }
+}

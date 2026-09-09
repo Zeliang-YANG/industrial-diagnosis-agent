@@ -1,0 +1,5 @@
+-r requirements-opcua.txt
+Flask==3.1.3
+Flask-Cors==6.0.5
+SQLAlchemy==2.0.52
+PyMySQL==1.2.0
