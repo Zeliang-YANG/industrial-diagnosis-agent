@@ -1,86 +1,202 @@
-# 工业设备诊断 Agent 改造
+# 工业设备智能诊断 Agent
 
-当前已恢复：Python OPC UA → 三条产线采集 → MySQL → KPI/事件 API，并增加 7 个只读诊断工具、独立工业诊断知识库 RAG 和 DeepSeek 调用循环。真实模型联调已通过。
+基于 Python OPC UA、MySQL、Flask、Vue 3 和 DeepSeek 构建的工业时序数据诊断 Agent。系统将设备指标、状态事件、故障记录、遥测摘要和产线分析封装为受控的只读 Tools，并结合独立工业知识库生成带证据引用和数据限制的诊断结论。
 
-## 本地启动
+本项目由原工业设备 KPI 毕业设计升级而来。当前连接的是 Python OPC UA 仿真环境，不是真实生产设备；知识库是项目自建 runbook，不是设备厂商维修手册。
 
-先在一个终端启动后端（同时启动 OPC UA 节点服务、模拟生产、采集和 Flask API）：
+## 项目亮点
+
+- **完整数据闭环**：3 条仿真产线、9 台设备，以约 1 秒周期完成 OPC UA 采集、状态事件化、MySQL 持久化和 KPI 计算。
+- **7 个只读 Tools**：覆盖设备 KPI、状态、故障、遥测摘要、产线时间线、产线 KPI 和知识检索。
+- **受控 Agent 编排**：高置信问题采用确定性路由和工具预执行，复杂问题使用 DeepSeek Tool Calling；模型不能调用当前路由未开放的工具。
+- **可追溯回答**：校验知识库引用、`status_event_log:<id>` 和 `raw_telemetry:<id>`，缺少或伪造引用时将回答降级为 `needs_review`。
+- **独立 RAG**：6 份版本化诊断文档、27 个章节块，支持内容哈希、知识库 revision 和文件变更自动重载。
+- **安全与可靠性**：固定查询、参数白名单、工具/轮次预算、并发限制、有限重试、CORS 白名单、可选 Bearer Token 和脱敏轮转审计日志。
+- **可复现评测**：44 项后端测试、14 条离线检索案例和 8 条真实模型回归案例。
+
+## 评测基线
+
+| 指标 | 当前结果 | 说明 |
+| --- | ---: | --- |
+| 后端测试 | 44/44 | 单元测试及隔离 MySQL 集成测试 |
+| DeepSeek 真实回归 | 8/8 | 小型版本化回归集，不代表生产准确率 100% |
+| RAG Hit@1 | 0.9231 | 相关查询首条命中率 |
+| RAG Hit@3 | 1.0000 | 相关查询前三条命中率 |
+| RAG MRR | 0.9615 | 首个正确结果的平均倒数排名 |
+| 无关问题拒绝率 | 1.0000 | 当前基准含 1 条无关查询 |
+| 真实回归平均消耗 | 约 2,098 tokens | 8 条案例共 16,781 tokens |
+| 真实回归平均耗时 | 约 4.02 秒/例 | 单次串行基线，不是并发 P95 |
+
+## 系统架构
+
+```mermaid
+flowchart LR
+    UI[Vue 3 前端] --> API[Flask API]
+    API --> POLICY[输入校验与安全策略]
+    POLICY --> AGENT[Agent 路由与调用循环]
+    AGENT <--> LLM[DeepSeek]
+    AGENT --> TOOLS[7 个只读 Tools]
+    TOOLS --> DB[(MySQL)]
+    TOOLS --> KB[工业诊断知识库]
+    OPC[Python OPC UA 仿真] --> COLLECTOR[asyncio 采集器]
+    COLLECTOR --> DB
+    AGENT --> VERIFY[引用与证据校验]
+    VERIFY --> API
+    API --> AUDIT[脱敏审计日志]
+```
+
+## Agent Tools
+
+| Tool | 用途 |
+| --- | --- |
+| `query_kpi` | 查询设备日 KPI、数据质量和可选日期对比 |
+| `query_device_state` | 查询设备状态事件、跨日裁剪和分页证据 |
+| `query_fault_events` | 查询故障事件和项目模拟故障字典 |
+| `query_telemetry_summary` | 汇总转速、负载、温度、计数器和采集连续性 |
+| `query_line_timeline` | 对齐一条产线 CNC、Robot、PLC 的状态时间线 |
+| `query_line_kpi` | 查询产线 KPI、三工位贡献和数据限制 |
+| `search_knowledge` | 检索 OEE、CNC、Robot、PLC/OPC UA 和数据质量知识 |
+
+所有数据 Tool 均使用固定 SQL/ORM 查询、严格 JSON Schema、设备或产线白名单和结果大小限制。系统不提供任意 SQL，也不执行 PLC 或设备写操作。
+
+## 本地运行
+
+### 环境要求
+
+- Python 3.11 或更高版本
+- MySQL 8.x
+- Node.js 20.19+ 或 22.12+
+- DeepSeek API Key
+
+### 1. 安装后端依赖
 
 ```bash
-cd '/Users/yzl/Desktop/agent project'
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r 毕设后端/requirements.txt
+```
+
+### 2. 配置环境变量
+
+```bash
+cp 毕设后端/.env.example 毕设后端/.env
+```
+
+编辑 `毕设后端/.env`，填写本机 MySQL 密码和 DeepSeek API Key。`.env` 已被 Git 忽略，请勿提交密钥。
+
+### 3. 启动后端
+
+```bash
 .venv/bin/python 毕设后端/run_local.py
 ```
 
-再在另一个终端启动前端：
+一键入口会启动 Python OPC UA Server、生产工况仿真、数据采集、隔离的 `yzl_agent_demo` MySQL 数据库和 Flask API。原 `yzl` 毕设数据库不会被此入口写入。
+
+健康检查：
 
 ```bash
-cd '/Users/yzl/Desktop/agent project/毕设前端'
+curl http://127.0.0.1:5001/api/health
+```
+
+### 4. 启动前端
+
+```bash
+cd 毕设前端
+npm ci
 npm run dev -- --host 127.0.0.1
 ```
 
-打开终端显示的前端地址。前端请求本机 5001 端口。
-不要同时运行旧 `main.py` 或独立 `opcua_server.py --demo`，一键入口已包含这些职责。
-两个终端分别按 Ctrl+C 停止；后端会关闭当前状态事件并保存数据。
-可用 `--seconds 30` 运行有限时长，或 `--port 5002` 更换 API 端口（前端地址需要相应修改）。
+打开 `http://127.0.0.1:5173`。
 
-## 数据库
+## 命令行使用
 
-- 复用 `毕设后端/.env` 中的 MySQL 凭据，支持已有环境变量配置。
-- `run_local.py` 固定使用同一 MySQL 服务的 `yzl_agent_demo` 库，首次启动自动创建。
-- 原 `yzl` 库的毕设数据保留，不由此入口写入。
-- 演示库数据持续保留，启动时从最近遥测恢复累计产量和次品计数。
-- 这套数据是模拟数据；当前没有连接真实工业设备。
-- 此入口适用于单实例本地演示；强制杀进程可能留下未关闭事件，应优先用 Ctrl+C 正常停止。
-
-## 接口
-
-- `http://127.0.0.1:5001/api/health`：MySQL、知识库、模型配置与 Agent Tools 健康状态。
-- `http://127.0.0.1:5001/api/workshop/kpi`：三条产线、九台设备 KPI。
-- `http://127.0.0.1:5001/api/events`：状态事件和报警统计。
-- `http://127.0.0.1:5001/api/kpi/daily`：默认 CNC 当日 KPI。
-- `http://127.0.0.1:5001/api/realtime`：原接口的第一条产线实时状态。
-
-## 重建依赖
+只检查模型配置，不发送请求：
 
 ```bash
-cd '/Users/yzl/Desktop/agent project'
-python3 -m venv .venv
-.venv/bin/python -m pip install -r 毕设后端/requirements.txt
+.venv/bin/python 毕设后端/agent_cli.py --check
 ```
 
-## Agent 工具
-
-已统一设备查询与看板计算入口，产线汇总采用当前看板的加权口径。
-7 个工具覆盖设备 KPI、设备状态、故障事件、遥测摘要、产线时间线、产线 KPI 和知识检索，均可通过命令行和 `/api/tools` 调用。
-用法、计算口径和限制见 `毕设后端/AGENT工具说明.md`。
-
-DeepSeek 配置、模型调用和命令行诊断见 `毕设后端/DeepSeek接入说明.md`。
-
-前端顶部已加入“工业设备诊断 Agent”面板：选择左侧设备工位后可自动生成带完整设备 ID 和日期的问题，页面会展示自然语言结论、工具执行记录和 token 用量。
-当前前后端均为本机演示用途；页面通过 `conversation_id` 保留最近 8 条对话，服务端会在 30 分钟后清理会话。该内存状态适合单实例演示。
-前端可用 `VITE_API_BASE_URL` 配置后端根地址；未配置时使用 `http://127.0.0.1:5001`。
-历史数据可用于构建评估案例，但须区分历史数据、当前模拟数据和文档中的推测。
-
-RAG 语料独立维护在 `毕设后端/knowledge/`，包含 OEE、CNC、机器人、PLC/OPC UA、数据质量和诊断输出规范。系统按 Markdown 章节动态切块并返回稳定的 `KB-*` 引用，不依赖论文、向量数据库或 embedding API。知识库不包含设备厂商维修手册。
-
-Agent 评估集位于 `毕设后端/evals/cases.json`，可运行单个案例或完整集合：
+执行一次真实诊断：
 
 ```bash
-.venv/bin/python 毕设后端/evaluate_agent.py --case rag_oee_diagnosis_order
-.venv/bin/python 毕设后端/evaluate_agent.py
-.venv/bin/python 毕设后端/evaluate_agent.py --summary-only
+.venv/bin/python 毕设后端/agent_cli.py \
+  '查询 BJ-CNC-001 今天的 OEE，并结合停机事件说明异常和数据限制'
 ```
 
-评估默认把数据工具绑定到隔离的 `yzl_agent_demo`，可用 `--database` 显式覆盖。评估会调用 DeepSeek 并消耗额度，检查工具选择、参数、禁用工具、关键事实、引用、token 预算和边界措辞。离线测试只验证编排与评分器。
+直接验证工具，不调用 LLM：
 
-RAG 检索基准不调用模型，可直接运行：
+```bash
+.venv/bin/python 毕设后端/tool_cli.py query_line_kpi --line-id 1 --date 2026-09-08
+.venv/bin/python 毕设后端/tool_cli.py search_knowledge \
+  --query 'CNC 的 OEE 下降时应该按什么顺序排查？'
+```
+
+## 测试与评测
+
+后端测试：
+
+```bash
+.venv/bin/python -m unittest discover -s 毕设后端/tests -p 'test_*.py'
+```
+
+离线 RAG 检索评测，不消耗模型额度：
 
 ```bash
 .venv/bin/python 毕设后端/evaluate_retrieval.py
 ```
 
-当前基准包含 14 个查询，输出 Hit@1、Hit@3、MRR、无关问题拒绝率和知识库内容指纹。GitHub Actions 会在 MySQL 8.4 服务上运行后端测试、检索评测和前端生产构建。
+真实模型回归，会消耗 DeepSeek 额度：
 
-完整的 Agent 工程成熟度、风险和两周改造顺序见 `AGENT_ENGINEERING_REVIEW.md`。
+```bash
+.venv/bin/python 毕设后端/evaluate_agent.py --summary-only
+```
 
-面试准备、Agent 工作原理、25 个常见问题及量化指标见 `AGENT_INTERVIEW_GUIDE.md`。
+前端生产构建：
+
+```bash
+cd 毕设前端
+npm ci
+npm run build
+```
+
+GitHub Actions 使用 MySQL 8.4、Python 3.12 和 Node.js 22 自动执行后端测试、离线检索评测、前端构建和敏感文件检查。真实模型评测不会在 CI 中消耗 API 额度。
+
+## 关键接口
+
+- `GET /api/health`：数据库、知识库、模型配置、Tools 和审计目录健康状态。
+- `POST /api/agent/chat`：Agent 对话，接受 `question` 和可选 `conversation_id`。
+- `GET /api/tools`：查看 provider-independent Tool Schema。
+- `POST /api/tools/<name>`：直接调用指定只读 Tool。
+- `GET /api/workshop/kpi`：车间、产线和工位 KPI。
+- `GET /api/events`：状态事件、报警排行和损失分布。
+
+## 项目结构
+
+```text
+.
+├── 毕设后端/
+│   ├── deepseek_agent.py       # Agent 编排、路由、Tool Calling、grounding
+│   ├── agent_tools.py          # 7 个只读 Tools 与 JSON Schema
+│   ├── knowledge_base.py       # 本地 RAG 加载、切块、检索与版本指纹
+│   ├── knowledge/              # 6 份独立工业诊断 runbook
+│   ├── evals/                  # Agent 与 RAG 评测案例
+│   ├── opcua_server.py         # Python OPC UA 仿真服务
+│   ├── cnc_logic.py            # 数据采集与状态事件化
+│   ├── kpi_engine.py           # KPI 计算与数据质量处理
+│   ├── app.py                  # Flask API
+│   └── tests/                  # 后端与 MySQL 集成测试
+├── 毕设前端/                   # Vue 3 + Element Plus + ECharts
+├── artifacts/                  # 脱敏联调结果示例
+├── AGENT_ENGINEERING_REVIEW.md # 工程成熟度与生产化差距
+├── AGENT_INTERVIEW_GUIDE.md    # 项目理解与面试指南
+└── PRODUCT_REVIEW.md           # 产品视角审查
+```
+
+## 安全与使用边界
+
+- 当前系统只读，不具备设备控制或维修执行能力。
+- 模拟故障字典和项目知识库只能生成排查假设，不能确认真实物理根因。
+- `AGENT_API_TOKEN` 是本地演示保护，不等同于企业 IdP、JWT、RBAC 或租户隔离。
+- 生产化仍需数据库只读运行账号、Secrets Manager、Redis/任务队列、OpenTelemetry、厂商授权资料和更大规模评测。
+
+更完整的设计取舍和限制见 [Agent 工程审查](AGENT_ENGINEERING_REVIEW.md)，面试讲解见 [Agent 面试指南](AGENT_INTERVIEW_GUIDE.md)。
