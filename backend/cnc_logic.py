@@ -160,7 +160,7 @@ class DigitalTwinCNC:
                     temperature=line_data.get("Temperature"),
                     part_count=line_data.get("PartCount"),
                     bad_count=line_data.get("BadPartCount"),
-                    thesis_state=states.get(cnc_id, "ssby"),
+                    machine_state=states.get(cnc_id, "ssby"),
                 )
                 self.db_session.add(tele)
 

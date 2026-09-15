@@ -42,7 +42,7 @@ class DeepSeekClient:
     def __init__(self):
         self.key, self.base, self.model = configuration()
         if not self.key or self.key.startswith('your_'):
-            raise AgentError('missing_api_key', '请在毕设后端/.env 填写 DEEPSEEK_API_KEY，然后重启后端。')
+            raise AgentError('missing_api_key', '请在 backend/.env 填写 DEEPSEEK_API_KEY，然后重启后端。')
         # 本机系统代理曾导致 POST 失败；默认直连，可显式启用系统代理。
         use_proxy = os.environ.get('DEEPSEEK_USE_SYSTEM_PROXY', 'false').lower() in ('1', 'true')
         self.opener = build_opener(NoRedirect(), *([] if use_proxy else [ProxyHandler({})]))

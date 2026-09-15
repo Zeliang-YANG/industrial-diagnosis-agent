@@ -26,8 +26,8 @@ class MySQLToolsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.original_bind = db.SessionLocal.kw['bind']
-        cls.admin = create_engine(db.engine.url.set(database=None))
-        cls.dbname = 'yzl_agent_test_' + uuid4().hex[:12]
+        cls.admin = create_engine(db.engine.url.set(database='mysql'))
+        cls.dbname = 'industrial_agent_test_' + uuid4().hex[:12]
         with cls.admin.begin() as c:
             c.execute(text(f'CREATE DATABASE `{cls.dbname}`'))
         cls.test_engine = create_engine(db.engine.url.set(database=cls.dbname))
@@ -40,7 +40,7 @@ class MySQLToolsTest(unittest.TestCase):
                     duration_sec=999999, alarm_code=alarm))
             def telemetry(day, clock, count):
                 session.add(db.RawTelemetry(equip_id=EID, timestamp=datetime.fromisoformat(day+'T'+clock),
-                    part_count=count, bad_count=0, thesis_state='srun', spindle_speed=1000+count,
+                    part_count=count, bad_count=0, machine_state='srun', spindle_speed=1000+count,
                     spindle_load=50, temperature=40))
             state(EID,'srun','2026-01-02T00:00','2026-01-02T01:00')
             state(EID,'su_down','2026-01-02T01:00','2026-01-02T01:43',101)

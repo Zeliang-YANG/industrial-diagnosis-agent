@@ -30,7 +30,7 @@ class CNCModel:
 
     def resolve_cnc_state(self, data):
         """
-        论文第2章核心：状态映射算法
+        将控制器信号映射为统一设备状态。
         将底层数据映射为标准状态空间
         """
         alarm = data.get('AlarmCode') or 0
@@ -68,7 +68,7 @@ class CNCModel:
         motion_state = data.get("MotionState")
         gripper_status = data.get("GripperStatus")
 
-        # 通信中断时，将机器人归入离线状态（与论文时间要素模型一致）
+        # 通信中断时，将机器人归入离线状态。
         if socket_connect == PLC_SOCKET_COMM_ERR_VALUE or robot_mode is None:
             return "soff"
         if error_id != 0:

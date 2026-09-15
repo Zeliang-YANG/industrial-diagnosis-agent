@@ -102,7 +102,7 @@ def _kpi_from_components(stats, total_qty, bad_qty, fault_count):
     t_plan = stats[TIME_BUCKET_PLAN]
     t_off = stats[TIME_BUCKET_NON_SCH]
 
-    # 按论文口径（第3章）：
+    # 项目采用以下 KPI 统计口径：
     # Tload = Ttotal - Tnon_sch
     # Top   = Tload - Tplan_down - Tdown
     # Tval  = Top - Tloss

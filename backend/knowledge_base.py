@@ -143,7 +143,7 @@ def _score(query, chunk):
 
 
 def search_knowledge(query, top_k=3):
-    """检索独立的项目知识库；知识文档与论文、数据库分开维护。"""
+    """检索独立维护的项目知识库。"""
     if not isinstance(query, str) or not query.strip() or len(query) > 1000:
         raise ValueError("query 必须为 1–1000 字符的非空文本")
     if type(top_k) is not int or not 1 <= top_k <= 5:

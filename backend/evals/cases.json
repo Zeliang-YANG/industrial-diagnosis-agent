@@ -7,7 +7,7 @@
     "require_grounding": true,
     "forbidden_tools": ["query_kpi", "query_device_state", "query_fault_events"],
     "required_text": ["时间开动率", "性能开动率", "质量指数", "KB-OEE-001"],
-    "forbidden_text": ["论文", "PDF p.", "根因已经确认"]
+    "forbidden_text": ["PDF p.", "根因已经确认"]
   },
   {
     "id": "rag_opcua_connection",
@@ -17,7 +17,7 @@
     "require_grounding": true,
     "forbidden_tools": ["query_kpi", "query_device_state", "query_fault_events"],
     "required_text": ["会话", "NodeId", "时间戳", "KB-PLC-001"],
-    "forbidden_text": ["论文", "厂商已经确认"]
+    "forbidden_text": ["厂商已经确认"]
   },
   {
     "id": "missing_device_and_date",

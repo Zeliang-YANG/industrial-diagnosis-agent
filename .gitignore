@@ -10,5 +10,5 @@ __pycache__/
 *.pdf
 *.doc
 *.docx
-毕设后端/data/
-毕设后端/logs/
+backend/data/
+backend/logs/

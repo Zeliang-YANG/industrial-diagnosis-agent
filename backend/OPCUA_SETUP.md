@@ -9,8 +9,8 @@
 在终端执行：
 
 ```bash
-cd '/Users/yzl/Desktop/agent project'
-.venv/bin/python 毕设后端/opcua_server.py --demo
+cd /path/to/industrial-diagnosis-agent
+.venv/bin/python backend/opcua_server.py --demo
 ```
 
 地址为 `opc.tcp://localhost:53530/OPCUA/SimulationServer`。服务仅监听本机回环地址。
@@ -21,16 +21,16 @@ cd '/Users/yzl/Desktop/agent project'
 主轴负载、温度目前为初始占位值，不能当成真实传感器曲线。
 仿真器中的“通信中断”是状态位变化，不是实际断开 TCP 连接。
 
-## 接回原后端
+## 独立启动 OPC UA 与采集服务
 
 ```bash
-cd '/Users/yzl/Desktop/agent project'
-.venv/bin/python 毕设后端/opcua_server.py
+cd /path/to/industrial-diagnosis-agent
+.venv/bin/python backend/opcua_server.py
 ```
 
-普通模式只提供可读写节点；原 `main.py` 已内置模拟器，应由它驱动生产并采集入库。
+普通模式只提供可读写节点；`main.py` 已内置模拟器，应由它驱动生产并采集入库。
 不要同时运行 `--demo` 和 `main.py`，否则有两个模拟器竞争写同一批节点。
-独立启动原后端时需要配置数据库及安装 Flask、SQLAlchemy 等依赖。推荐使用 `run_local.py` 管理服务与演示数据库。
+独立启动后端时需要配置数据库及安装 Flask、SQLAlchemy 等依赖。推荐使用 `run_local.py` 管理服务与演示数据库。
 
 ## 重建环境
 
@@ -38,7 +38,7 @@ cd '/Users/yzl/Desktop/agent project'
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install -r 毕设后端/requirements-opcua.txt
+.venv/bin/python -m pip install -r backend/requirements-opcua.txt
 ```
 
 ## 已验证
@@ -46,4 +46,4 @@ python3 -m venv .venv
 通过真实本地 OPC UA TCP 客户端，对三条产线全部 48 个节点检查数据类型和读写；逐线验证生产计数增加、CNC 故障状态映射和故障清除。
 测试服务使用端口 53531，测试完成后关闭。
 
-下一步先恢复数据库 → 采集入库 → KPI/API 的闭环，再加入只读 Agent 查询工具。
+完整应用已实现数据库、采集入库、KPI/API 与只读 Agent 查询工具闭环。

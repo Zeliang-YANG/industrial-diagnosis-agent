@@ -7,7 +7,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('question', nargs='?')
     parser.add_argument('--check', action='store_true')
-    parser.add_argument('--database', choices=['yzl_agent_demo', 'yzl'], default='yzl_agent_demo')
+    parser.add_argument('--database', default='industrial_agent_demo')
     args = parser.parse_args()
     from deepseek_agent import configuration, run_agent, AgentError
     if args.check:

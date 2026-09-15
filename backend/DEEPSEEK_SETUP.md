@@ -4,7 +4,7 @@
 
 ## 配置
 
-在 `毕设后端/.env` 填写：
+在 `backend/.env` 填写：
 
 ```dotenv
 DEEPSEEK_API_KEY=
@@ -27,8 +27,8 @@ ALLOWED_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
 ## 检查与运行
 
 ```bash
-.venv/bin/python 毕设后端/agent_cli.py --check
-.venv/bin/python 毕设后端/agent_cli.py '查询 BJ-CNC-001 今天的 OEE，并结合停机事件说明异常和数据限制'
+.venv/bin/python backend/agent_cli.py --check
+.venv/bin/python backend/agent_cli.py '查询 BJ-CNC-001 今天的 OEE，并结合停机事件说明异常和数据限制'
 ```
 
 启动整套系统后也可调用：
@@ -56,14 +56,14 @@ curl --noproxy '*' http://127.0.0.1:5001/api/agent/chat \
 离线编排测试不会调用 DeepSeek：
 
 ```bash
-.venv/bin/python -m unittest discover -s 毕设后端/tests -p 'test_*.py'
+.venv/bin/python -m unittest discover -s backend/tests -p 'test_*.py'
 ```
 
 真实模型评测会消耗账号额度：
 
 ```bash
-.venv/bin/python 毕设后端/evaluate_agent.py --case rag_oee_diagnosis_order
-.venv/bin/python 毕设后端/evaluate_agent.py --summary-only
+.venv/bin/python backend/evaluate_agent.py --case rag_oee_diagnosis_order
+.venv/bin/python backend/evaluate_agent.py --summary-only
 ```
 
-当前 8 个案例覆盖 RAG、信息缺失、遥测/产线工具精确参数、分页边界、证据引用、密钥请求和安全联锁越界请求。评测默认绑定隔离的 `yzl_agent_demo`，并检查状态、工具选择、参数、token 预算、关键事实、禁用表述、grounding 和时间线边界。
+当前 8 个案例覆盖 RAG、信息缺失、遥测/产线工具精确参数、分页边界、证据引用、密钥请求和安全联锁越界请求。评测默认绑定隔离的 `industrial_agent_demo`，并检查状态、工具选择、参数、token 预算、关键事实、禁用表述、grounding 和时间线边界。

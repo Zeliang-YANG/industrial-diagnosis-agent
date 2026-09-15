@@ -19,14 +19,14 @@
 以下命令无需启动 Flask 或 OPC UA，只要求 MySQL 可用且演示库已有数据：
 
 ```bash
-.venv/bin/python 毕设后端/tool_cli.py query_kpi --equip-id BJ-CNC-001 --date 2026-09-09
-.venv/bin/python 毕设后端/tool_cli.py query_telemetry_summary --equip-id BJ-CNC-001 --date 2026-09-09 --start-time 08:00 --end-time 10:00
-.venv/bin/python 毕设后端/tool_cli.py query_line_timeline --line-id 1 --date 2026-09-09 --limit 20
-.venv/bin/python 毕设后端/tool_cli.py query_line_kpi --line-id 1 --date 2026-09-09
-.venv/bin/python 毕设后端/tool_cli.py search_knowledge --query 'CNC 的 OEE 下降时应该按什么顺序排查？'
+.venv/bin/python backend/tool_cli.py query_kpi --equip-id BJ-CNC-001 --date 2026-09-09
+.venv/bin/python backend/tool_cli.py query_telemetry_summary --equip-id BJ-CNC-001 --date 2026-09-09 --start-time 08:00 --end-time 10:00
+.venv/bin/python backend/tool_cli.py query_line_timeline --line-id 1 --date 2026-09-09 --limit 20
+.venv/bin/python backend/tool_cli.py query_line_kpi --line-id 1 --date 2026-09-09
+.venv/bin/python backend/tool_cli.py search_knowledge --query 'CNC 的 OEE 下降时应该按什么顺序排查？'
 ```
 
-默认只读 `yzl_agent_demo`。只有明确传 `--database yzl` 时才读取原毕设库。
+默认只读 `industrial_agent_demo`，也可通过 `--database` 指定独立测试数据库。
 
 ## 计算与证据口径
 
@@ -41,13 +41,13 @@
 
 ## RAG
 
-`knowledge/` 与论文分开维护，当前包含 6 份项目自建诊断手册、27 个章节块。检索器采用可解释的本地混合词法排序，支持文件变更自动重载、文档内容哈希和知识库 revision。离线基准包含 14 个查询；当前不含厂商授权维修手册，也没有把通用排查建议当作已确认物理根因。
+`knowledge/` 包含 6 份项目自建诊断手册、27 个章节块。检索器采用可解释的本地混合词法排序，支持文件变更自动重载、文档内容哈希和知识库 revision。离线基准包含 14 个查询；当前不含厂商授权维修手册，也不会把通用排查建议当作已确认物理根因。
 
 ## 验证
 
 ```bash
-.venv/bin/python -m unittest discover -s 毕设后端/tests -p 'test_*.py'
-.venv/bin/python 毕设后端/evaluate_retrieval.py
+.venv/bin/python -m unittest discover -s backend/tests -p 'test_*.py'
+.venv/bin/python backend/evaluate_retrieval.py
 ```
 
 测试使用随机命名的临时 MySQL 库并在结束后删除，覆盖参数边界、跨午夜、分页、遥测空档、计数器重置、只读 SQL、HTTP 一致性、RAG 与证据核验。

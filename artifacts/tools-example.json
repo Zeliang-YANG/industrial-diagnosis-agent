@@ -84,7 +84,7 @@
     "equip_id": "BJ-CNC-001",
     "source": {
       "data_kind": "simulation",
-      "database": "yzl_agent_demo",
+      "database": "industrial_agent_demo",
       "mode": "read_only",
       "timezone": "Asia/Shanghai"
     },
@@ -139,7 +139,7 @@
     "note": "无匹配记录不代表设备正常；事件按 ID 分页，时长仅为所选日期内的交集。",
     "source": {
       "data_kind": "simulation",
-      "database": "yzl_agent_demo",
+      "database": "industrial_agent_demo",
       "mode": "read_only",
       "timezone": "Asia/Shanghai"
     },
@@ -179,7 +179,7 @@
     "note": "无匹配记录不代表设备正常；事件按 ID 分页，时长仅为所选日期内的交集。",
     "source": {
       "data_kind": "simulation",
-      "database": "yzl_agent_demo",
+      "database": "industrial_agent_demo",
       "mode": "read_only",
       "timezone": "Asia/Shanghai"
     },

@@ -19,7 +19,7 @@ def main():
     parser.add_argument('--end-time', help='遥测窗口结束时间，HH:MM 或 HH:MM:SS')
     parser.add_argument('--query', default='CNC 的 OEE 下降时应该按什么顺序排查？')
     parser.add_argument('--top-k', type=int, default=3)
-    parser.add_argument('--database', choices=['yzl_agent_demo', 'yzl'], default='yzl_agent_demo')
+    parser.add_argument('--database', default='industrial_agent_demo')
     args = parser.parse_args()
     import db_models
     from sqlalchemy import create_engine

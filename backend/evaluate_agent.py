@@ -82,8 +82,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cases", default=str(DEFAULT_CASES))
     parser.add_argument("--case", help="只运行指定 case id")
-    parser.add_argument("--database", default=os.environ.get("AGENT_EVAL_DATABASE", "yzl_agent_demo"),
-                        help="数据工具使用的 MySQL 数据库，默认 yzl_agent_demo")
+    parser.add_argument("--database", default=os.environ.get("AGENT_EVAL_DATABASE", "industrial_agent_demo"),
+                        help="数据工具使用的 MySQL 数据库，默认 industrial_agent_demo")
     parser.add_argument("--output", help="可选，将完整 JSON 结果保存到指定文件")
     parser.add_argument("--summary-only", action="store_true", help="只打印汇总，仍执行全部评分")
     args = parser.parse_args()

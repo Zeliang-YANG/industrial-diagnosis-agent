@@ -46,7 +46,7 @@
 - Agent 请求体限制为 32 KB，CORS 默认只允许本机前端，可配置 Bearer token，默认并发上限为 4。
 - 轮转 JSONL 审计只记录运行元数据，不记录用户问题、回答、工具参数或原始结果。
 - 健康接口检查 MySQL、知识库 revision、模型配置、7 个工具和审计目录。
-- 演示库增加 `raw_telemetry(equip_id, timestamp)`、`status_event_log(equip_id, start_time, end_time)` 和日报 `(date, equip_id)` 唯一索引。原 `yzl` 数据库保持不动，因为旧日报存在重复记录，需要迁移前清理。
+- 演示库包含 `raw_telemetry(equip_id, timestamp)`、`status_event_log(equip_id, start_time, end_time)` 和日报 `(date, equip_id)` 唯一索引；生产迁移前仍需清洗重复数据并通过迁移工具管理 schema。
 
 ### 工程交付
 

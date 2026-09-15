@@ -319,7 +319,7 @@ def get_realtime():
             if row.equip_id not in by_equip:
                 by_equip[row.equip_id] = {
                     "equip_id": row.equip_id,
-                    "state": row.thesis_state,
+                    "state": row.machine_state,
                     "speed": row.spindle_speed,
                     "count": row.part_count,
                 }

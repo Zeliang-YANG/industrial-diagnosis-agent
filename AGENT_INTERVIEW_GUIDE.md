@@ -82,7 +82,7 @@ RAG 引用与数据证据校验
 | 诊断工具 | 7 个 | 覆盖设备 KPI、状态、故障、遥测摘要、产线时间线、产线 KPI、知识检索 |
 | 仿真产线 | 3 条 | 每条包含 CNC、Robot、PLC |
 | 仿真设备 | 9 台 | 数据来自 Python OPC UA 仿真，不是真实设备 |
-| RAG 文档 | 6 份 | 项目自建 runbook，与论文分离 |
+| RAG 文档 | 6 份 | 项目自建工业诊断 runbook |
 | RAG chunks | 27 块 | 按 Markdown 二级标题切块 |
 | RAG 单次返回 | 1–5 块 | 默认 top_k=3 |
 | 知识 revision | `fee1141558dfe536` | 由文件名和内容 SHA-256 得到的 16 位指纹 |
@@ -145,9 +145,9 @@ RAG 引用与数据证据校验
 
 ## 三、90 秒项目介绍模板
 
-> 我的毕业设计原来是一个工业 KPI 平台，已经有 Python OPC UA 数据采集、MySQL、KPI 计算、Flask API 和 Vue 看板。我没有另外做一个教程型聊天 Agent，而是在原系统上增加了诊断 Agent 层。
+> 我做的是一个工业设备智能诊断 Agent 应用。系统通过 Python OPC UA 仿真三条产线和九台设备，将实时数据写入 MySQL，并由 Flask API 和 Vue 看板提供交互。我在数据链路之上实现了诊断 Agent 层。
 >
-> 用户可以直接问某台设备为什么 OEE 下降，Agent 会根据问题选择 7 个只读工具中的一个或多个，查询设备 KPI、状态故障、遥测摘要，或者整条产线的 KPI 和时间线。通用排查知识来自与论文分离的 6 份本地 runbook，共 27 个 chunk。回答会引用知识库章节、事件 ID 或原始遥测 ID，并明确模拟数据、采集空档和指标单位等限制。
+> 用户可以直接问某台设备为什么 OEE 下降，Agent 会根据问题选择 7 个只读工具中的一个或多个，查询设备 KPI、状态故障、遥测摘要，或者整条产线的 KPI 和时间线。通用排查知识来自 6 份项目自建 runbook，共 27 个 chunk。回答会引用知识库章节、事件 ID 或原始遥测 ID，并明确模拟数据、采集空档和指标单位等限制。
 >
 > 编排上我没有完全依赖框架。高置信问题由代码确定性路由和预执行，复杂问题才让 DeepSeek进行 Tool Calling；同时加入轮次与调用预算、重试、并发限制、安全策略和 grounding 校验。当前 44 项后端测试全部通过，8 条真实模型回归全部通过；14 条检索基准的 Hit@3 为 1.0、MRR 为 0.9615。这个项目目前定位为企业级原型，生产化还需要企业身份权限、多实例状态、厂商资料和更大规模评测。
 
@@ -276,7 +276,7 @@ line_OEE = weighted_availability × CNC_P × CNC_Q
 
 ### Q22：MySQL 为什么需要复合索引？
 
-**回答：** 高频查询模式是“某设备 + 时间范围”，因此增加 `raw_telemetry(equip_id, timestamp)` 和 `status_event_log(equip_id, start_time, end_time)`；日报按 `(date, equip_id)` 建唯一索引，避免同设备同日期重复聚合。原毕业设计库存在旧重复数据，所以索引只安全应用到演示库，生产迁移前要先清洗并用 Alembic 管理。
+**回答：** 高频查询模式是“某设备 + 时间范围”，因此增加 `raw_telemetry(equip_id, timestamp)` 和 `status_event_log(equip_id, start_time, end_time)`；日报按 `(date, equip_id)` 建唯一索引，避免同设备同日期重复聚合。生产迁移前要先清洗重复数据并用 Alembic 管理 schema。
 
 ### Q23：为什么日志不保存问题和回答？
 
@@ -284,7 +284,7 @@ line_OEE = weighted_availability × CNC_P × CNC_Q
 
 ### Q24：为什么用 Flask，不用 FastAPI？
 
-**回答：** 原毕业设计就是 Flask，改造目标是复用已有系统并突出 Agent 能力。当前 schema 在 Agent Tool 层自行校验。若进入生产，我会考虑 FastAPI/Pydantic 获得统一类型校验和 OpenAPI，但框架迁移的收益要和现有业务稳定性权衡。
+**回答：** 当前应用使用 Flask 承载已有 KPI、事件与 Agent API，Tool 层执行独立 schema 校验。若进入生产，我会考虑 FastAPI/Pydantic 获得统一类型校验和 OpenAPI，但框架迁移的收益要和现有业务稳定性权衡。
 
 ### Q25：如果让你继续做两周，会做什么？
 
@@ -336,7 +336,7 @@ flowchart LR
 
 ```bash
 curl --noproxy '*' http://127.0.0.1:5001/api/health
-.venv/bin/python 毕设后端/agent_cli.py --check
+.venv/bin/python backend/agent_cli.py --check
 ```
 
 健康接口应显示：MySQL、知识库、DeepSeek、7 Tools 和审计日志均为 `ok`。不要展示 `.env`。
@@ -373,7 +373,7 @@ CNC 的 OEE 下降时应该按什么顺序排查？请引用知识库。
 
 - 在工业 KPI 平台上构建证据驱动诊断 Agent，将设备 KPI、状态/故障事件、遥测摘要、产线时间线与知识检索封装为 7 个只读 Tools；通过受控 Tool Calling 完成问题理解、数据取证、异常解释与可追溯回答。
 - 设计高置信确定性路由、工具白名单、轮次/token 预算和可恢复错误重试，校验知识、事件及遥测引用；对密钥泄露、写 SQL 和绕过安全联锁请求实现模型前拦截。
-- 构建与论文分离的工业诊断 RAG，维护 6 份版本化 runbook、27 个章节块和内容指纹；14 条检索基准达到 Hit@3 1.0、MRR 0.9615。
+- 构建独立工业诊断 RAG，维护 6 份版本化 runbook、27 个章节块和内容指纹；14 条检索基准达到 Hit@3 1.0、MRR 0.9615。
 - 建立 44 项后端测试和 8 条 DeepSeek 真实回归案例，覆盖精确工具参数、数据质量、分页边界、grounding 与安全策略；真实回归平均约 2,098 tokens、4.02 秒/例。
 
 如果简历空间有限，优先保留前 3 条。面试时主动说明 8 条真实案例是小型回归集，体现你理解指标边界。

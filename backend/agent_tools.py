@@ -37,7 +37,7 @@ def validate(equip_id, date):
 def source(session):
     return {"database": session.get_bind().url.database,
             "timezone": "Asia/Shanghai", "mode": "read_only",
-            "data_kind": "simulation" if session.get_bind().url.database == "yzl_agent_demo"
+            "data_kind": "simulation" if session.get_bind().url.database == "industrial_agent_demo"
                          else "historical_or_test_data_origin_unverified"}
 
 
@@ -194,7 +194,7 @@ def query_telemetry_summary(equip_id, date, start_time=None, end_time=None):
         observed_coverage = sum(gap for gap in gaps if gap <= 5)
         part_delta, part_resets = _counter_delta(rows, "part_count")
         bad_delta, bad_resets = _counter_delta(rows, "bad_count")
-        states = Counter(row.thesis_state or "unknown" for row in rows)
+        states = Counter(row.machine_state or "unknown" for row in rows)
         return {
             "status": "ok", "equip_id": equip_id, "date": date,
             "window": {"start": start.isoformat(), "end": end.isoformat()},

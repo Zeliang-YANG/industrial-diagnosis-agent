@@ -2,7 +2,7 @@
 
 基于 Python OPC UA、MySQL、Flask、Vue 3 和 DeepSeek 构建的工业时序数据诊断 Agent。系统将设备指标、状态事件、故障记录、遥测摘要和产线分析封装为受控的只读 Tools，并结合独立工业知识库生成带证据引用和数据限制的诊断结论。
 
-本项目由原工业设备 KPI 毕业设计升级而来。当前连接的是 Python OPC UA 仿真环境，不是真实生产设备；知识库是项目自建 runbook，不是设备厂商维修手册。
+当前版本面向工业设备运行分析与异常诊断场景。系统连接 Python OPC UA 仿真环境；知识库采用项目自建 runbook，不包含设备厂商维修手册。
 
 ## 项目亮点
 
@@ -73,24 +73,24 @@ flowchart LR
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r 毕设后端/requirements.txt
+python -m pip install -r backend/requirements.txt
 ```
 
 ### 2. 配置环境变量
 
 ```bash
-cp 毕设后端/.env.example 毕设后端/.env
+cp backend/.env.example backend/.env
 ```
 
-编辑 `毕设后端/.env`，填写本机 MySQL 密码和 DeepSeek API Key。`.env` 已被 Git 忽略，请勿提交密钥。
+编辑 `backend/.env`，填写本机 MySQL 密码和 DeepSeek API Key。`.env` 已被 Git 忽略，请勿提交密钥。
 
 ### 3. 启动后端
 
 ```bash
-.venv/bin/python 毕设后端/run_local.py
+.venv/bin/python backend/run_local.py
 ```
 
-一键入口会启动 Python OPC UA Server、生产工况仿真、数据采集、隔离的 `yzl_agent_demo` MySQL 数据库和 Flask API。原 `yzl` 毕设数据库不会被此入口写入。
+一键入口会启动 Python OPC UA Server、生产工况仿真、数据采集、隔离的 `industrial_agent_demo` MySQL 数据库和 Flask API。
 
 健康检查：
 
@@ -101,7 +101,7 @@ curl http://127.0.0.1:5001/api/health
 ### 4. 启动前端
 
 ```bash
-cd 毕设前端
+cd frontend
 npm ci
 npm run dev -- --host 127.0.0.1
 ```
@@ -113,21 +113,21 @@ npm run dev -- --host 127.0.0.1
 只检查模型配置，不发送请求：
 
 ```bash
-.venv/bin/python 毕设后端/agent_cli.py --check
+.venv/bin/python backend/agent_cli.py --check
 ```
 
 执行一次真实诊断：
 
 ```bash
-.venv/bin/python 毕设后端/agent_cli.py \
+.venv/bin/python backend/agent_cli.py \
   '查询 BJ-CNC-001 今天的 OEE，并结合停机事件说明异常和数据限制'
 ```
 
 直接验证工具，不调用 LLM：
 
 ```bash
-.venv/bin/python 毕设后端/tool_cli.py query_line_kpi --line-id 1 --date 2026-09-08
-.venv/bin/python 毕设后端/tool_cli.py search_knowledge \
+.venv/bin/python backend/tool_cli.py query_line_kpi --line-id 1 --date 2026-09-08
+.venv/bin/python backend/tool_cli.py search_knowledge \
   --query 'CNC 的 OEE 下降时应该按什么顺序排查？'
 ```
 
@@ -136,25 +136,25 @@ npm run dev -- --host 127.0.0.1
 后端测试：
 
 ```bash
-.venv/bin/python -m unittest discover -s 毕设后端/tests -p 'test_*.py'
+.venv/bin/python -m unittest discover -s backend/tests -p 'test_*.py'
 ```
 
 离线 RAG 检索评测，不消耗模型额度：
 
 ```bash
-.venv/bin/python 毕设后端/evaluate_retrieval.py
+.venv/bin/python backend/evaluate_retrieval.py
 ```
 
 真实模型回归，会消耗 DeepSeek 额度：
 
 ```bash
-.venv/bin/python 毕设后端/evaluate_agent.py --summary-only
+.venv/bin/python backend/evaluate_agent.py --summary-only
 ```
 
 前端生产构建：
 
 ```bash
-cd 毕设前端
+cd frontend
 npm ci
 npm run build
 ```
@@ -174,7 +174,7 @@ GitHub Actions 使用 MySQL 8.4、Python 3.12 和 Node.js 22 自动执行后端�
 
 ```text
 .
-├── 毕设后端/
+├── backend/
 │   ├── deepseek_agent.py       # Agent 编排、路由、Tool Calling、grounding
 │   ├── agent_tools.py          # 7 个只读 Tools 与 JSON Schema
 │   ├── knowledge_base.py       # 本地 RAG 加载、切块、检索与版本指纹
@@ -185,7 +185,7 @@ GitHub Actions 使用 MySQL 8.4、Python 3.12 和 Node.js 22 自动执行后端�
 │   ├── kpi_engine.py           # KPI 计算与数据质量处理
 │   ├── app.py                  # Flask API
 │   └── tests/                  # 后端与 MySQL 集成测试
-├── 毕设前端/                   # Vue 3 + Element Plus + ECharts
+├── frontend/                   # Vue 3 + Element Plus + ECharts
 ├── artifacts/                  # 脱敏联调结果示例
 ├── AGENT_ENGINEERING_REVIEW.md # 工程成熟度与生产化差距
 ├── AGENT_INTERVIEW_GUIDE.md    # 项目理解与面试指南

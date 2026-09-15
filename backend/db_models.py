@@ -40,7 +40,7 @@ def _database_url():
     password = os.environ.get("MYSQL_PASSWORD", "")
     host = os.environ.get("MYSQL_HOST", "127.0.0.1")
     port = os.environ.get("MYSQL_PORT", "3306")
-    database = os.environ.get("MYSQL_DATABASE", "yzl")
+    database = os.environ.get("MYSQL_DATABASE", "industrial_agent_demo")
     if password:
         return f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
     return f"mysql+pymysql://{user}@{host}:{port}/{database}"
@@ -66,7 +66,7 @@ class RawTelemetry(Base):
     temperature = Column(Float)     # 电机温度
     part_count = Column(Integer)    # 产量
     bad_count = Column(Integer)     # 次品量
-    thesis_state = Column(String(20)) # 论文定义的当前状态(srun, ssby等)
+    machine_state = Column(String(20))  # 设备状态编码（srun、ssby 等）
 
 # ==========================================
 # 表 2: 设备状态事件表 (用于计算 OEE 和 MTBF)
@@ -83,8 +83,8 @@ class StatusEventLog(Base):
     alarm_code = Column(Integer, default=0)    # 故障码
 
 # ==========================================
-# 表 3: [新增] 每日/班次 KPI 聚合表
-# 用于第5章看板展示，存储计算好的高价值指标
+# 表 3: 每日/班次 KPI 聚合表
+# 为看板和诊断工具存储计算后的指标
 # ==========================================
 class DailyKPIReport(Base):
     __tablename__ = 'daily_kpi_report'

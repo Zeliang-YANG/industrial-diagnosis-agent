@@ -32,7 +32,7 @@ def _truncate_mysql() -> None:
                 "可选做法：\n"
                 "  1) 在项目根目录创建 .env，写入一行：MYSQL_PASSWORD=你的密码\n"
                 "  2) 或本终端执行：export MYSQL_PASSWORD='你的密码'\n"
-                "  3) 或：export DATABASE_URL='mysql+pymysql://root:密码@127.0.0.1:3306/yzl'"
+                "  3) 或：export DATABASE_URL='mysql+pymysql://root:密码@127.0.0.1:3306/industrial_agent_demo'"
             )
             raise SystemExit(1) from e
         raise

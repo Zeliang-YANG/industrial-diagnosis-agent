@@ -10,11 +10,13 @@ async def run(seconds, port):
     import db_models
     from sqlalchemy import create_engine, text
     if db_models.engine.dialect.name != "mysql":
-        raise RuntimeError("本地入口需要原项目的 MySQL 连接配置")
-    # 复用连接凭据，模拟数据独立保存，不改写原毕设数据库。
-    with db_models.engine.begin() as connection:
-        connection.execute(text("CREATE DATABASE IF NOT EXISTS yzl_agent_demo CHARACTER SET utf8mb4"))
-    url = db_models.engine.url.set(database="yzl_agent_demo")
+        raise RuntimeError("本地入口需要 MySQL 连接配置")
+    database_name = "industrial_agent_demo"
+    admin_engine = create_engine(db_models.engine.url.set(database="mysql"), pool_pre_ping=True)
+    with admin_engine.begin() as connection:
+        connection.execute(text(f"CREATE DATABASE IF NOT EXISTS {database_name} CHARACTER SET utf8mb4"))
+    admin_engine.dispose()
+    url = db_models.engine.url.set(database=database_name)
     db_models.engine.dispose()
     db_models.engine = create_engine(url, pool_pre_ping=True)
     db_models.SessionLocal.configure(bind=db_models.engine)
@@ -57,7 +59,7 @@ async def run(seconds, port):
             http = make_server("127.0.0.1", port, app, threaded=True)
             worker = threading.Thread(target=http.serve_forever, daemon=True)
             worker.start()
-            print("模拟数据库：yzl_agent_demo（MySQL，数据持续保留）", flush=True)
+            print(f"模拟数据库：{database_name}（MySQL，数据持续保留）", flush=True)
             print(f"API：http://127.0.0.1:{port}/api/workshop/kpi", flush=True)
             print("按 Ctrl+C 停止全部后端服务并关闭当前状态事件。", flush=True)
             monitor = asyncio.create_task(twin.start_monitoring())
